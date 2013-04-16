@@ -122,7 +122,7 @@ class Muslandia extends SBApp
 		$texto = "Opciones para la LIGA:\n\n".
 						 "21 - Ultima jornada disputada.\n".
 						 "22 - Jornada en curso.\n".
-						 "23 - Proxima jornada.\n".
+						 "23 - Proxima jornada a disputar.\n".
 						 "24 - Clasificacion.\n\n".
  						 "Escribe el numero correspondiente:";
 	  $this->replyOrFalse($texto);
@@ -145,29 +145,165 @@ class Muslandia extends SBApp
 			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
 		}
 
-		// Hago la consulta
+		// Hallo la jornada actual
 		$query = "SELECT * FROM LIGA_JornadaActual";
 		if($result = $mysqli->query($query)) {
-			$j_actual = $result->feth_assoc();
-			$this->replyOrFalse($j_actual["id_jornada"]);
+			$j_actual = $result->fetch_assoc();
 		}
-			/*
-			$texto = "Parejas participantes y categoria en la que participan en LIGA:\n\n";
-			while($row = $result->fetch_assoc()) {
-					$texto .= $row["id_pareja"]." ".$row["nombres"]." -> ".$row["categoria_en_liga"]."\n";
-			}*/
+		// Libero $result
+		$result->free();
+		
+		// Busco la jornada anterior
+		if($j_actual["id_jornada"] > 1) {
+			$query = "SELECT * FROM LIGA_Calendario WHERE id_jornada = ".($j_actual["id_jornada"]-1)." ORDER BY id_partida";
+			if($result = $mysqli->query($query)) {
+				$texto = "ULTIMA JORNADA DISPUTADA (".($j_actual["id_jornada"]-1)."):\n".
+						 "PAREJAS   V1   V2\n\n";
+				$contador = 0;
+				while($row = $result->fetch_assoc()) {
+					$texto .= $this->nombresPareja($row["local"])."    ".$row["vaca1_local"]."     ".$row["vaca2_local"]."\n".
+							  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
+							  "-----------------\n".
+							  "GANADOR: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])))."\n";
+					$contador++;
+					if($contador == 1){
+						$texto .= "\n\n";
+					}
+				}
+				$this->replyOrFalse($texto);
+			}
+			// Libero $result
+			$result->free();
+		} else {
+			$this->replyOrFalse("No hay ninguna jornada disputada.");
+		}
+		// Cierro la conexión con la Base de Datos
+		$mysqli->close();
 	}
 	private function nodo22()
 	{
-		;
+		// Hago la conexión a la Base de Datos
+		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
+		if($mysqli->connect_error) {
+			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
+		}
+
+		// Hallo la jornada actual
+		$query = "SELECT * FROM LIGA_JornadaActual";
+		if($result = $mysqli->query($query)) {
+			$j_actual = $result->fetch_assoc();
+		}
+		// Libero $result
+		$result->free();
+		
+		// Busco la jornada actual
+		$query = "SELECT * FROM LIGA_Calendario WHERE id_jornada = ".$j_actual["id_jornada"]." ORDER BY id_partida";
+		if($result = $mysqli->query($query)) {
+			$texto = "JORNADA ACTUAL (".$j_actual["id_jornada"]."):\n".
+					 "PAREJAS   V1   V2\n\n";
+			$contador = 0;
+			while($row = $result->fetch_assoc()) {
+				if($row["pareja_ganadora"]<>'-') {
+					$texto .= $this->nombresPareja($row["local"])."    ".$row["vaca1_local"]."     ".$row["vaca2_local"]."\n".
+							  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
+							  "-----------------\n".
+							  "GANADOR: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])))."\n";
+					$contador++;
+					if($contador == 1) {
+						$texto .= "\n\n";
+					}
+				} else {
+					$texto .= $this->nombresPareja($row["local"])."\n".
+							  $this->nombresPareja($row["visitante"])."\n".
+							  "-----------------\n".
+							  "PARTIDA AUN SIN JUGAR.\n";
+					$contador++;
+					if($contador == 1) {
+						$texto .= "\n\n";
+					}
+				}
+			}
+			if($contador == 0) {
+				$texto = "Actualmente no hay ninguna jornada en curso.\n";
+			}
+			$this->replyOrFalse($texto);
+		}
+		// Libero $result
+		$result->free();
+		
+		// Cierro la conexión con la Base de Datos
+		$mysqli->close();
 	}
 	private function nodo23()
 	{
-		;
+		// Hago la conexión a la Base de Datos
+		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
+		if($mysqli->connect_error) {
+			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
+		}
+
+		// Hallo la jornada actual
+		$query = "SELECT * FROM LIGA_JornadaActual";
+		if($result = $mysqli->query($query)) {
+			$j_actual = $result->fetch_assoc();
+		}
+		// Libero $result
+		$result->free();
+		
+		// Busco la jornada siguiente
+		if($j_actual["id_jornada"] < 6) {
+			$query = "SELECT * FROM LIGA_Calendario WHERE id_jornada = ".($j_actual["id_jornada"]+1)." ORDER BY id_partida";
+			if($result = $mysqli->query($query)) {
+				$texto = "PROXIMA JORNADA (".($j_actual["id_jornada"]+1)."):\n".
+						 "PAREJAS\n\n";
+				$contador = 0;
+				while($row = $result->fetch_assoc()) {
+					$texto .= $this->nombresPareja($row["local"])."\n".
+							  $this->nombresPareja($row["visitante"])."\n";
+					$contador++;
+					if($contador == 1){
+						$texto .= "\n";
+					}
+				}
+				$this->replyOrFalse($texto);
+			}
+			// Libero $result
+			$result->free();
+		} else {
+			$this->replyOrFalse("No hay mas jornadas por disputar.");
+		}
+		// Cierro la conexión con la Base de Datos
+		$mysqli->close();
 	}
 	private function nodo24()
 	{
-		;
+		// Hago la conexión a la Base de Datos
+		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
+		if($mysqli->connect_error) {
+			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
+		}
+
+		// Extraigo los datos de la clasificación
+		$query = "SELECT * FROM LIGA_Clasificacion ORDER BY posicion";
+		if($result = $mysqli->query($query)) {
+			$texto = "                CLASIFICACION            \n".
+					 "POS   PAREJAS   PJ   JG   PxB   PTOS\n\n";
+			$contador = 0;
+			while($row = $result->fetch_assoc()) {
+				$texto .= $row["posicion"]."        ".$this->nombresPareja($row["id_pareja"])."     ".$row["partidas_jugadas"]."     ".
+						  $row["juegos_ganados"]."      ".$row["puntos_por_bonificacion"]."        ".$row["puntos"]."\n";
+				$contador++;
+				if($contador == 4){
+					$texto .= "\n";
+				}
+			}
+			$this->replyOrFalse($texto);
+		}
+		// Libero $result
+		$result->free();
+		
+		// Cierro la conexión con la Base de Datos
+		$mysqli->close();
 	}
 	private function nodo31()
 	{
@@ -185,7 +321,29 @@ class Muslandia extends SBApp
 	{
 		;
 	}
-
+	
+	private function nombresPareja($id_pareja_)
+	{	
+		// Hago la conexión a la Base de Datos
+		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
+		if($mysqli->connect_error) {
+			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
+		}
+		
+		// Hallo los nombres de la pareja correspondiente a la id dada
+		$nom = "";
+		$query = "SELECT nombres FROM Parejas WHERE id_pareja = ".$id_pareja_;
+		if($result = $mysqli->query($query)) {
+			$nom = $result->fetch_assoc();
+		}
+		// Libero $result
+		$result->free();
+		
+		// Cierro la conexión con la Base de Datos
+		$mysqli->close();	
+		
+		return $nom["nombres"];
+	}
 }
 
 // Create a new SBApp on dev.spotbros.com and copy-paste your SBCode and key
