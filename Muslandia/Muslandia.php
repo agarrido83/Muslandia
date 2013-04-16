@@ -93,13 +93,13 @@ class Muslandia extends SBApp
 	
 	private function nodo1()
 	{
-
+		// Hago la conexión a la Base de Datos
 		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
-
 		if($mysqli->connect_error) {
 			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
 		}
 
+		// Hago la consulta
 		$query = "SELECT * FROM Parejas ORDER BY id_pareja";
 		if($result = $mysqli->query($query)) {
 
@@ -107,9 +107,14 @@ class Muslandia extends SBApp
 			while($row = $result->fetch_assoc()) {
 					$texto .= $row["id_pareja"]." ".$row["nombres"]." -> ".$row["categoria_en_liga"]."\n";
 			}
-			$result->free();
+			
+			// Mando el mensaje con el resultado
 			$this->replyOrFalse($texto);
+				
 		}
+		// Libero $result
+		$result->free();
+		// Cierro la conexión con la Base de Datos
 		$mysqli->close();
 	}
 	private function nodo2()
@@ -124,11 +129,33 @@ class Muslandia extends SBApp
 	}
 	private function nodo3()
 	{
-		;
+		$texto = "Opciones para la COPA:\n\n".
+						 "31 - Cuartos de Final.\n".
+						 "32 - Semifinales.\n".
+						 "33 - Final.\n".
+						 "34 - Cuadro de Honor.\n\n".
+ 						 "Escribe el numero correspondiente:";
+	  $this->replyOrFalse($texto);
 	}
 	private function nodo21()
 	{
-		;
+		// Hago la conexión a la Base de Datos
+		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
+		if($mysqli->connect_error) {
+			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
+		}
+
+		// Hago la consulta
+		$query = "SELECT * FROM LIGA_JornadaActual";
+		if($result = $mysqli->query($query)) {
+			$j_actual = $result->feth_assoc();
+			$this->replyOrFalse($j_actual["id_jornada"]);
+		}
+			/*
+			$texto = "Parejas participantes y categoria en la que participan en LIGA:\n\n";
+			while($row = $result->fetch_assoc()) {
+					$texto .= $row["id_pareja"]." ".$row["nombres"]." -> ".$row["categoria_en_liga"]."\n";
+			}*/
 	}
 	private function nodo22()
 	{
