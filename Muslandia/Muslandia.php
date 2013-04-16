@@ -3,8 +3,6 @@ require_once('../SBClientSDK/SBApp.php');
 
 class Muslandia extends SBApp
 {
-	private $nodo;
-
 	// Métodos protegidos
 	protected function onError($errorType_)
 	{
@@ -37,82 +35,46 @@ class Muslandia extends SBApp
 		}
 	}
 	
-	/* getter / setter */
-	public function getNodo()	{return $this->nodo;}
-	public function setNodo($nodo) {$this->nodo = $nodo;}
-	
 	// Métodos privados
 	private function compruebaEntrada($comando)
 	{
 		switch (strtolower($comando)) {
 			case "menu":
-				$this->setNodo("0");
 				$this->menuInicial();
 				break;
 			case "1":
-				$nodo = $this->getNodo();
-				$this->replyOrFalse($nodo);
-				switch ($this->getNodo()) {
-					case "0":
-						$this->replyOrFalse("h");
-						$this->setNodo("1");
-						$this->replyOrFalse("o");
-						$this->nodo1();
-						break;
-					case "2":
-						$this->setNodo("21");
-						$this->nodo21();
-						break;	
-					case "3":
-						$this->setNodo("31");
-						$this->nodo31();
-						break;
-				}
+				$this->nodo1();
 				break;
 			case "2":
-				switch ($this->getNodo()) {
-					case "0":
-						$this->setNodo("2");
-						$this->nodo2();
-						break;
-					case "2":
-						$this->setNodo("22");
-						$this->nodo22();
-						break;
-					case "3":
-						$this->setNodo("32");
-						$this->nodo32();
-						break;
-				}			
-				break;
+				$this->nodo2();
+				break;	
 			case "3":
-				switch ($this->getNodo()) {
-					case "0":
-						$this->setNodo("3");
-						$this->nodo3();
-						break;
-					case "2":
-						$this->setNodo("23");
-						$this->nodo23();
-						break;
-					case "3":
-						$this->setNodo("33");
-						$this->nodo33();
-						break;
-				}
+				$this->nodo3();
 				break;
-			case "4":
-				switch ($this->getNodo()) {
-					case "2":
-						$this->setNodo("24");
-						$this->nodo24();
-						break;
-					case "3":
-						$this->setNodo("34");
-						$this->nodo34();
-						break;
-				}	
+			case "21":
+				$this->nodo21();
 				break;
+			case "22":
+				$this->nodo22();
+				break;
+			case "23":
+				$this->nodo23();
+				break;
+			case "24":
+				$this->nodo24();
+				break;
+			case "31":
+				$this->nodo31();
+				break;
+			case "32":
+				$this->nodo32();
+				break;
+			case "33":
+				$this->nodo33();
+				break;
+			case "34":
+				$this->nodo34();
+				break;								
 			default:
 				$this->replyOrFalse("Comando incorrecto. Escriba 'ayuda' para ver los comandos disponibles...");	
 		}
@@ -123,25 +85,42 @@ class Muslandia extends SBApp
 		$texto = "En estos momentos se esta disputando el I Torneo de Mus.\n".
 						 "Que quieres consultar?\n\n".
 						 "1 - Parejas participantes.\n".
-						 "2 - LIGA\n".
-						 "3 - COPA\n";
+						 "2 - LIGA.\n".
+						 "3 - COPA.\n\n".
+						 "Escribe el numero correspondiente:";
 	  $this->replyOrFalse($texto);
 	}
 	
 	private function nodo1()
 	{
-		$this->replyOrFalse("hola");
+
 		$mysqli = new mysqli('mysql.hostinger.es','u414170863_agg83','agarrido83','u414170863_mus');
-		
+
 		if($mysqli->connect_error) {
 			die('Error de Conexión ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
 		}
-		
-		$this->replyOrFalse("Exito ".$mysqli->host_info."\n");
+
+		$query = "SELECT * FROM Parejas ORDER BY id_pareja";
+		if($result = $mysqli->query($query)) {
+
+			$texto = "Parejas participantes y categoria en la que participan en LIGA:\n\n";
+			while($row = $result->fetch_assoc()) {
+					$texto .= $row["id_pareja"]." ".$row["nombres"]." -> ".$row["categoria_en_liga"]."\n";
+			}
+			$result->free();
+			$this->replyOrFalse($texto);
+		}
+		$mysqli->close();
 	}
 	private function nodo2()
 	{
-		;
+		$texto = "Opciones para la LIGA:\n\n".
+						 "21 - Ultima jornada disputada.\n".
+						 "22 - Jornada en curso.\n".
+						 "23 - Proxima jornada.\n".
+						 "24 - Clasificacion.\n\n".
+ 						 "Escribe el numero correspondiente:";
+	  $this->replyOrFalse($texto);
 	}
 	private function nodo3()
 	{
