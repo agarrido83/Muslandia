@@ -376,45 +376,36 @@ class Muslandia extends SBApp
 							 "--------------------\n\n";
 			$contador = 0;
 			while($row = $result->fetch_assoc()) {
-				$texto .= "CF".($contador+1)."\n";
+				$texto .= "CF".($contador+1)."\n".
+				          "----\n";
 				if($row["local"] <> 0 and $row["visitante"] <> 0 and $row["pareja_ganadora"] <> '-') {
 					$texto .= $this->nombresPareja($row["local"])."    ".$row["vaca1_local"]."     ".$row["vaca2_local"]."\n".
-							  	  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
-							  		"-----------------\n".
-							  		"GANADOR: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])));
+							  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
+							  "-----------------\n".
+							  "CLASIFICADOS: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])));
 					$contador++;
 					if($contador <> 4) {
 						$texto .= "\n\n";
 					}
 				} else if ($row["local"] == 0 or $row["visitante"] == 0 and $row["pareja_ganadora"] <> '-') {
 					if ($row["local"] == 0) {
-						$texto .= $this->nombresPareja($row["visitante"])."\n";
+						$texto .= "<VACANTE>\n".
+								  $this->nombresPareja($row["visitante"])."\n";
 					} else {
-						$texto .= $this->nombresPareja($row["local"])."\n";
+						$texto .= $this->nombresPareja($row["local"])."\n".
+								  "<VACANTE>\n";
 					}
-					$texto .=		"-----------------\n".
-							  			"CLASIFICADO DIRECTAMENTE A SEMIFINALES.";
+					$texto .= "-----------------\n".
+							  "CLASIFICADOS DIRECTAMENTE A SEMIFINALES.";
 					$contador++;
 					if($contador <> 4) {
-						$texto .= "\n\n";
-					}
-				} else if ($row["local"] == 0 or $row["visitante"] == 0 and $row["pareja_ganadora"] <> '-') {
-					if ($row["local"] == 0) {
-						$texto .= $this->nombresPareja($row["visitante"])."\n";
-					} else {
-						$texto .= $this->nombresPareja($row["local"])."\n";
-					}
-					$texto .=		"-----------------\n".
-							  			"CLASIFICADO DIRECTAMENTE A SEMIFINALES.";
-					$contador++;
-					if($contador <> 2) {
 						$texto .= "\n\n";
 					}
 				} else {
 					$texto .= $this->nombresPareja($row["local"])."\n".
-							  		$this->nombresPareja($row["visitante"])."\n".
-							  		"-----------------\n".
-							  		utf8_encode("PARTIDA AÚN SIN JUGAR.");
+							  $this->nombresPareja($row["visitante"])."\n".
+							  "-----------------\n".
+							  utf8_encode("PARTIDA AÚN SIN JUGAR.");
 					$contador++;
 					if($contador <> 4) {
 						$texto .= "\n\n";
@@ -446,38 +437,41 @@ class Muslandia extends SBApp
 		$query = "SELECT * FROM COPA_Calendario WHERE id_eliminatoria like 'SF%' ORDER BY id_eliminatoria";
 		if($result = $mysqli->query($query)) {
 			$texto = "SEMIFINALES\n".
- 							 "--------------\n\n";
+ 					 "--------------\n\n";
 			$contador = 0;
 			while($row = $result->fetch_assoc()) {
-				$texto .= "SF".($contador+1)."\n";
+				$texto .= "SF".($contador+1)."\n".
+				          "----\n";
 				if($row["local"] <> 0 and $row["visitante"] <> 0 and $row["pareja_ganadora"] <> '-') {
 					$texto .= $this->nombresPareja($row["local"])."    ".$row["vaca1_local"]."     ".$row["vaca2_local"]."\n".
-							  	  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
-							  		"-----------------\n".
-							  		"GANADOR: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])));
+							  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
+							  "-----------------\n".
+							  "CLASIFICADOS: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])));
 					$contador++;
 					if($contador <> 2) {
 						$texto .= "\n\n";
 					}
 				} else if ($row["local"] == 0 or $row["visitante"] == 0 and $row["pareja_ganadora"] == '-') {
 					if ($row["local"] == 0) {
-						$texto .= $this->nombresPareja($row["visitante"])."\n";
+						$texto .= "<GANADORES DE CF".(($contador == 0)?("1"):("3")).">\n".
+						          $this->nombresPareja($row["visitante"])."\n";
 					} else {
-						$texto .= $this->nombresPareja($row["local"])."\n";
+						$texto .= $this->nombresPareja($row["local"])."\n".
+								  "<GANADORES DE CF".(($contador == 0)?("2"):("4")).">\n";
 					}
-					$texto .=		"-----------------\n".
-							  			"ESPERANDO CONTRINCANTE...";
+					$texto .= "-----------------\n".
+							  "ESPERANDO CONTRINCANTE...";
 					$contador++;
 					if($contador <> 2) {
 						$texto .= "\n\n";
 					}
 				} else if ($row["local"] == 0 and $row["visitante"] == 0 and $row["pareja_ganadora"] == '-') {
-					$texto .=	utf8_encode("NADIE CLASIFICADO AÚN.");
+					$texto .= utf8_encode("NADIE CLASIFICADO AÚN.");
 				} else {
 					$texto .= $this->nombresPareja($row["local"])."\n".
-							  		$this->nombresPareja($row["visitante"])."\n".
-							  		"-----------------\n".
-							  		utf8_encode("PARTIDA AÚN SIN JUGAR.");
+							  $this->nombresPareja($row["visitante"])."\n".
+							  "-----------------\n".
+							  utf8_encode("PARTIDA AÚN SIN JUGAR.");
 					$contador++;
 					if($contador <> 2) {
 						$texto .= "\n\n";
@@ -509,28 +503,33 @@ class Muslandia extends SBApp
 		$query = "SELECT * FROM COPA_Calendario WHERE id_eliminatoria = 'FIN'";
 		if($result = $mysqli->query($query)) {
 			$texto = "FINAL\n".
-							 "-------\n\n";
+					 "-------\n\n";
 			while($row = $result->fetch_assoc()) {
 				if($row["local"] <> 0 and $row["visitante"] <> 0 and $row["pareja_ganadora"] <> '-') {
 					$texto .= $this->nombresPareja($row["local"])."    ".$row["vaca1_local"]."     ".$row["vaca2_local"]."\n".
-							  	  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
-							  		"-----------------\n".
-							  		"GANADOR: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"])));
+							  $this->nombresPareja($row["visitante"])."    ".$row["vaca1_visitante"]."     ".$row["vaca2_visitante"]."\n".
+							  "-----------------\n".
+							  utf8_encode("CAMPEONES: ".(($row["pareja_ganadora"]=='L')?($this->nombresPareja($row["local"])):($this->nombresPareja($row["visitante"]))));
 				} else if ($row["local"] == 0 and $row["visitante"] == 0 and $row["pareja_ganadora"] == '-') {
-					$texto .=	utf8_encode("NADIE CLASIFICADO AÚN.");
+					$texto .= "<GANADORES DE SF1>\n".
+							  "<GANADORES DE SF2>\n".
+							  "-----------------------\n".
+						  	  utf8_encode("NADIE CLASIFICADO AÚN.");
 				} else if ($row["local"] == 0 or $row["visitante"] == 0 and $row["pareja_ganadora"] == '-') {
 					if ($row["local"] == 0) {
-						$texto .= $this->nombresPareja($row["visitante"])."\n";
+						$texto .= "<GANADORES DE SF1>\n".
+								  $this->nombresPareja($row["visitante"])."\n";
 					} else {
-						$texto .= $this->nombresPareja($row["local"])."\n";
+						$texto .= $this->nombresPareja($row["local"])."\n".
+								  "<GANADORES DE SF2>\n";
 					}
-					$texto .=		"-----------------\n".
-							  			"ESPERANDO CONTRINCANTE...";
+					$texto .= "-----------------\n".
+							  "ESPERANDO CONTRINCANTE...";
 				} else {
 					$texto .= $this->nombresPareja($row["local"])."\n".
-							  		$this->nombresPareja($row["visitante"])."\n".
-							  		"-----------------\n".
-							  		utf8_encode("PARTIDA AÚN SIN JUGAR.");
+							  $this->nombresPareja($row["visitante"])."\n".
+							  "-----------------\n".
+							  utf8_encode("PARTIDA AÚN SIN JUGAR.");
 				}
 			}
 		}
